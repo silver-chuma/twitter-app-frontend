@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux'
 import { createTweet } from '../store/slices/tweetsSlice'
 import { api } from '../api/client'
 import { Form, Button, Card, Spinner } from 'react-bootstrap'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const schema = yup.object({
   content: yup.string().required().max(1000),
@@ -26,11 +28,11 @@ export default function CreateTweet() {
   const onSubmit = async (data:any) => {
     try {
       await dispatch<any>(createTweet({ content: data.content, recipients: data.recipients || [] })).unwrap();
-      alert('Tweet created');
+      toast.success('Tweet created successfully!', { autoClose: 5000 });
       setValue('content','');
       setValue('recipients',[]);
     } catch (err:any) {
-      alert(err?.response?.data?.message || err.message || 'Failed to create tweet');
+      toast.error(err?.response?.data?.message || err.message || '❌ Failed to create tweet', { autoClose: 3000 });
     }
   }
 
@@ -52,6 +54,9 @@ export default function CreateTweet() {
         </Form.Group>
         <Button type="submit">Post Tweet</Button>
       </Form>
+
+      {/* Toast notification container */}
+      <ToastContainer position="top-right" hideProgressBar />
     </Card>
   )
 }
