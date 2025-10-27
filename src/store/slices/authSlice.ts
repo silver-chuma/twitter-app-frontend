@@ -6,18 +6,10 @@ export const register = createAsyncThunk('auth/register', async (payload: { emai
   return r.data;
 });
 
-export const login = createAsyncThunk('auth/login', async (data, { rejectWithValue }) => {
-  try {
-    const res = await api.post('/auth/login', data);
-    return res.data;
-  } catch (err: any) {
-    const message =
-      err.response?.data?.message ||
-      err.response?.data?.error || 
-      err.message || 
-      'Login failed';
-    return rejectWithValue(message);
-  }
+export const login = createAsyncThunk('auth/login', async (payload: { email: string, password: string }) => {
+  const r = await api.post('/auth/login', payload);
+  localStorage.setItem('token', r.data.accessToken);
+  return r.data;
 });
 
 const authSlice = createSlice({
@@ -34,7 +26,7 @@ const authSlice = createSlice({
     builder
       .addCase(login.pending, (s) => { s.status = 'loading'; s.error = null; })
       .addCase(login.fulfilled, (s, a) => { s.status = 'succeeded'; s.token = a.payload.accessToken; })
-      .addCase(login.rejected, (s, a) => { s.status = 'failed'; s.error = (a.payload as string) || 'Invalid credentials' })
+      .addCase(login.rejected, (s, a) => { s.status = 'failed'; s.error = a.error.message; })
   }
 });
 
